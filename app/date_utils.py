@@ -3,6 +3,8 @@
 Regola usata: se una scadenza cade di sabato, domenica o in un festivo
 nazionale, slitta al primo giorno lavorativo successivo.
 """
+from __future__ import annotations
+
 import calendar
 from datetime import date, timedelta
 
