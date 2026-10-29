@@ -1,0 +1,27 @@
+# Configurazione per Render (render.com) — "Blueprint".
+# Server a Francoforte (UE, utile per il GDPR) e disco permanente per il database.
+services:
+  - type: web
+    name: scadenzo
+    runtime: python
+    region: frankfurt
+    plan: starter            # il piano gratuito non ha dischi: i dati si perderebbero
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    healthCheckPath: /salute
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.1"
+      - key: SCADENZO_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /var/data/scadenzo.sqlite
+      - key: CREA_DEMO       # crea lo studio dimostrativo con dati inventati
+        value: "1"
+    disk:
+      name: dati
+      mountPath: /var/data
+      sizeGB: 1

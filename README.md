@@ -27,7 +27,7 @@ Nome provvisorio.
 
 ```bash
 pip install -r requirements.txt
-python demo.py          # facoltativo: studio di esempio con dati inventati
+python -m app.demo      # facoltativo: studio di esempio con dati inventati
 flask --app app run     # → http://127.0.0.1:5000
 ```
 
@@ -40,7 +40,13 @@ pip install pytest
 python -m pytest
 ```
 
-## In produzione
+## Online su Render
+
+Il file `render.yaml` contiene già tutta la configurazione (server a Francoforte,
+disco permanente, chiave segreta generata in automatico, studio demo).
+Su Render: **New → Blueprint** → scegliere questo repository → **Apply**.
+
+## In produzione (altro hosting)
 
 ```bash
 export SCADENZO_ENV=production

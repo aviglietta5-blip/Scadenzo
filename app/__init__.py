@@ -45,7 +45,19 @@ def create_app(config=None):
     app.register_blueprint(auth.bp)
     app.register_blueprint(views.bp)
 
+    @app.route("/salute")
+    def salute():  # usato dall'hosting per sapere se l'app è viva
+        return {"ok": True}
+
+    if produzione:
+        # dietro il proxy HTTPS dell'hosting
+        from werkzeug.middleware.proxy_fix import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
     with app.app_context():
         db.init_db()
+        if os.environ.get("CREA_DEMO") == "1":
+            from .demo import crea_studio_demo
+            crea_studio_demo()
 
     return app
