@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Scadenzo{% endblock %} · Scadenzo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='stile.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+{% if g.utente %}
+<div class="layout">
+  <nav class="menu">
+    <div class="logo">Scadenzo</div>
+    <div class="studio">{{ g.utente.studio_nome }}</div>
+    {% set ep = request.endpoint %}
+    <a href="{{ url_for('main.cruscotto') }}" class="{{ 'attivo' if ep == 'main.cruscotto' }}">Cruscotto</a>
+    <a href="{{ url_for('main.scadenze') }}" class="{{ 'attivo' if ep and 'scadenz' in ep }}">Scadenze</a>
+    <a href="{{ url_for('main.clienti') }}" class="{{ 'attivo' if ep and 'client' in ep }}">Clienti</a>
+    <a href="{{ url_for('main.tipi_pagina') }}" class="{{ 'attivo' if ep == 'main.tipi_pagina' }}">Tipi di scadenza</a>
+    {% if g.utente.ruolo == 'admin' %}
+    <a href="{{ url_for('main.collaboratori_pagina') }}" class="{{ 'attivo' if ep == 'main.collaboratori_pagina' }}">Studio e collaboratori</a>
+    {% endif %}
+    <div class="utente">
+      <div>{{ g.utente.nome }}</div>
+      <a href="{{ url_for('auth.cambia_password') }}">Cambia password</a>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="link">Esci</button>
+      </form>
+    </div>
+  </nav>
+  <main class="contenuto">
+    {% include "_flash.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% else %}
+<main class="accesso">
+  <div class="logo grande">Scadenzo</div>
+  {% include "_flash.html" %}
+  {% block auth %}{% endblock %}
+</main>
+{% endif %}
+</body>
+</html>

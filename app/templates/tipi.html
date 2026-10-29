@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Tipi di scadenza{% endblock %}
+{% block content %}
+<h1>Tipi di scadenza</h1>
+<p class="muto">Un tipo ricorrente si ricrea da solo quando segni la scadenza come fatta. Il "giorno fisso" serve per scadenze come l'F24 (sempre il 16): se cade in un festivo, slitta al primo giorno lavorativo.</p>
+{% set admin = g.utente.ruolo == 'admin' %}
+<table class="tabella">
+  <thead><tr><th>Nome</th><th>Ricorrenza</th><th>Giorno fisso</th>{% if admin %}<th></th>{% endif %}</tr></thead>
+  <tbody>
+  {% for t in tipi %}
+  <tr>
+    {% if admin %}
+    <td colspan="3">
+      <form method="post" class="in-linea">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <input type="hidden" name="id" value="{{ t.id }}">
+        <input type="color" name="colore" value="{{ t.colore }}" aria-label="Colore">
+        <input name="nome" value="{{ t.nome }}" required aria-label="Nome">
+        <select name="ricorrenza" aria-label="Ricorrenza">
+          {% for v, l in [('nessuna','Nessuna'),('mensile','Mensile'),('trimestrale','Trimestrale'),('annuale','Annuale')] %}
+          <option value="{{ v }}" {{ 'selected' if t.ricorrenza == v }}>{{ l }}</option>{% endfor %}
+        </select>
+        <input name="giorno" type="number" min="1" max="31" value="{{ t.giorno or '' }}" placeholder="—" aria-label="Giorno fisso" class="corto">
+        <button class="btn piccolo">Salva</button>
+      </form>
+    </td>
+    <td>
+      <form method="post" action="{{ url_for('main.elimina_tipo', id_=t.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="link pericolo" data-conferma="Eliminare il tipo {{ t.nome }}?">Elimina</button>
+      </form>
+    </td>
+    {% else %}
+    <td><span class="etichetta" style="--c: {{ t.colore }}">{{ t.nome }}</span></td>
+    <td>{{ t.ricorrenza|capitalize }}</td><td>{{ t.giorno or '—' }}</td>
+    {% endif %}
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if admin %}
+<h2>Nuovo tipo</h2>
+<form method="post" class="in-linea">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="color" name="colore" value="#4f6bed" aria-label="Colore">
+  <input name="nome" placeholder="Nome, es. INTRASTAT" required aria-label="Nome">
+  <select name="ricorrenza" aria-label="Ricorrenza">
+    <option value="nessuna">Nessuna</option><option value="mensile">Mensile</option>
+    <option value="trimestrale">Trimestrale</option><option value="annuale">Annuale</option>
+  </select>
+  <input name="giorno" type="number" min="1" max="31" placeholder="Giorno" aria-label="Giorno fisso" class="corto">
+  <button class="btn primario piccolo">Aggiungi</button>
+</form>
+{% endif %}
+{% endblock %}

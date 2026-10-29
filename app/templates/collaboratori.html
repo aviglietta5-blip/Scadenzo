@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Studio e collaboratori{% endblock %}
+{% block content %}
+<h1>Studio e collaboratori</h1>
+
+<form method="post" action="{{ url_for('main.rinomina_studio') }}" class="in-linea">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <label>Nome dello studio <input name="nome" value="{{ studio.nome }}" required></label>
+  <button class="btn piccolo">Salva</button>
+</form>
+
+<h2>Collaboratori</h2>
+<table class="tabella">
+  <thead><tr><th>Nome</th><th>Email</th><th>Ruolo</th><th>Stato</th><th></th></tr></thead>
+  <tbody>
+  {% for u in righe %}
+  <tr class="{{ 'fatta' if not u.attivo }}">
+    <td>{{ u.nome }}</td><td>{{ u.email }}</td>
+    <td>{{ 'Amministratore' if u.ruolo == 'admin' else 'Collaboratore' }}</td>
+    <td>{{ 'Attivo' if u.attivo else 'Disattivato' }}</td>
+    <td>
+      {% if u.id != g.utente.id %}
+      <form method="post" action="{{ url_for('main.cambia_attivo', id_=u.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="link">{{ 'Disattiva' if u.attivo else 'Riattiva' }}</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Aggiungi collaboratore</h2>
+<form method="post" class="modulo">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="riga">
+    <label>Nome <input name="nome" required></label>
+    <label>Email <input type="email" name="email" required></label>
+  </div>
+  <div class="riga">
+    <label>Password temporanea <input name="password" minlength="10" required></label>
+    <label>Ruolo
+      <select name="ruolo"><option value="collaboratore">Collaboratore</option><option value="admin">Amministratore</option></select></label>
+  </div>
+  <div class="bottoni"><button class="btn primario">Aggiungi</button></div>
+</form>
+{% endblock %}

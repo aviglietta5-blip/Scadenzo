@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifica' if s else 'Nuova' }} scadenza{% endblock %}
+{% block content %}
+<h1>{{ 'Modifica scadenza' if s else 'Nuova scadenza' }}</h1>
+{% set f = request.form if request.method == 'POST' else (s or {}) %}
+<form method="post" class="modulo">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <label>Cliente
+    <select name="cliente_id" required data-referente-auto><option value="">Scegli…</option>
+      {% for c in clienti %}<option value="{{ c.id }}" data-referente="{{ c.referente_id or '' }}" {{ 'selected' if f.get('cliente_id')|string == c.id|string }}>{{ c.ragione_sociale }}</option>{% endfor %}
+    </select></label>
+  <label>Tipo
+    <select name="tipo_id" required><option value="">Scegli…</option>
+      {% for t in tipi %}<option value="{{ t.id }}" {{ 'selected' if f.get('tipo_id')|string == t.id|string }}>{{ t.nome }}</option>{% endfor %}
+    </select></label>
+  <label>Data <input type="date" name="data" required value="{{ f.get('data', '') }}"></label>
+  <label>Referente
+    <select name="referente_id"><option value="">Nessuno</option>
+      {% for u in collaboratori %}<option value="{{ u.id }}" {{ 'selected' if f.get('referente_id')|string == u.id|string }}>{{ u.nome }}</option>{% endfor %}
+    </select></label>
+  <label>Importo (facoltativo) <input name="importo" inputmode="decimal" placeholder="es. 1.250,00" value="{{ (f.get('importo')|string).replace('.', ',') if f.get('importo') not in (none, '') else '' }}"></label>
+  <label>Note <textarea name="note" rows="3">{{ f.get('note') or '' }}</textarea></label>
+  <div class="bottoni">
+    <button class="btn primario">Salva</button>
+    <a class="btn" href="{{ url_for('main.scadenze') }}">Annulla</a>
+  </div>
+</form>
+{% if s %}
+<form method="post" action="{{ url_for('main.elimina_scadenza', id_=s.id) }}" class="zona-pericolo">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <button class="btn pericolo" data-conferma="Eliminare questa scadenza?">Elimina scadenza</button>
+</form>
+{% endif %}
+{% endblock %}

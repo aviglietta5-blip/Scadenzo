@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Scadenze in blocco{% endblock %}
+{% block content %}
+<h1>Aggiungi scadenze in blocco</h1>
+<p class="muto">Crea la stessa scadenza per più clienti in un colpo. Ogni scadenza prende il referente del cliente. I doppioni vengono saltati.</p>
+<form method="post" class="modulo largo">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="riga">
+    <label>Tipo
+      <select name="tipo_id" required><option value="">Scegli…</option>
+        {% for t in tipi %}<option value="{{ t.id }}">{{ t.nome }}</option>{% endfor %}
+      </select></label>
+    <label>Data <input type="date" name="data" required></label>
+  </div>
+  <label class="check"><input type="checkbox" name="lavorativo" value="1" checked> Se cade di sabato, domenica o festivo, sposta al primo giorno lavorativo</label>
+  <fieldset>
+    <legend>Clienti</legend>
+    <div class="bottoni piccoli">
+      <button type="button" class="btn piccolo" data-spunta="tutti">Tutti</button>
+      <button type="button" class="btn piccolo" data-spunta="nessuno">Nessuno</button>
+      {% for u in collaboratori %}<button type="button" class="btn piccolo" data-spunta="ref-{{ u.id }}">Di {{ u.nome }}</button>{% endfor %}
+    </div>
+    <div class="griglia-clienti">
+      {% for c in clienti %}
+      <label class="check"><input type="checkbox" name="clienti" value="{{ c.id }}" data-ref="ref-{{ c.referente_id or '' }}"> {{ c.ragione_sociale }}</label>
+      {% else %}
+      <p>Non hai ancora clienti. <a href="{{ url_for('main.cliente_form') }}">Aggiungine uno</a>.</p>
+      {% endfor %}
+    </div>
+  </fieldset>
+  <div class="bottoni">
+    <button class="btn primario">Crea scadenze</button>
+    <a class="btn" href="{{ url_for('main.scadenze') }}">Annulla</a>
+  </div>
+</form>
+{% endblock %}

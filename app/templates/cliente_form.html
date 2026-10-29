@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Modifica' if c else 'Nuovo' }} cliente{% endblock %}
+{% block content %}
+<h1>{{ 'Modifica cliente' if c else 'Nuovo cliente' }}</h1>
+{% set f = request.form if request.method == 'POST' else (c or {}) %}
+<form method="post" class="modulo">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <label>Ragione sociale <input name="ragione_sociale" required value="{{ f.get('ragione_sociale') or '' }}"></label>
+  <div class="riga">
+    <label>Codice fiscale <input name="codice_fiscale" value="{{ f.get('codice_fiscale') or '' }}"></label>
+    <label>Partita IVA <input name="partita_iva" value="{{ f.get('partita_iva') or '' }}"></label>
+  </div>
+  <label>Referente nello studio
+    <select name="referente_id"><option value="">Nessuno</option>
+      {% for u in collaboratori %}<option value="{{ u.id }}" {{ 'selected' if f.get('referente_id')|string == u.id|string }}>{{ u.nome }}</option>{% endfor %}
+    </select></label>
+  <label>Note <textarea name="note" rows="3">{{ f.get('note') or '' }}</textarea></label>
+  {% if c %}
+  <label>Stato
+    <select name="attivo">
+      <option value="1" {{ 'selected' if c.attivo }}>Attivo</option>
+      <option value="0" {{ 'selected' if not c.attivo }}>Non più seguito</option>
+    </select></label>
+  {% endif %}
+  <div class="bottoni">
+    <button class="btn primario">Salva</button>
+    <a class="btn" href="{{ url_for('main.clienti') }}">Annulla</a>
+  </div>
+</form>
+{% if c and g.utente.ruolo == 'admin' %}
+<form method="post" action="{{ url_for('main.elimina_cliente', id_=c.id) }}" class="zona-pericolo">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <button class="btn pericolo" data-conferma="Eliminare il cliente e TUTTE le sue scadenze? Se smetti solo di seguirlo, meglio impostarlo come 'Non più seguito'.">Elimina cliente</button>
+</form>
+{% endif %}
+{% endblock %}

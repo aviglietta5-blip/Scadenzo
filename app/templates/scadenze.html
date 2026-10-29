@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Scadenze{% endblock %}
+{% block content %}
+{% set oggi_iso = primo.today().isoformat() %}
+{% set torna = request.full_path %}
+{% set selezione = true %}
+<div class="intestazione">
+  <h1>Scadenze</h1>
+  <div class="bottoni">
+    <a class="btn" href="{{ url_for('main.scadenze_in_blocco') }}">Aggiungi in blocco</a>
+    <a class="btn primario" href="{{ url_for('main.nuova_scadenza') }}">Nuova scadenza</a>
+  </div>
+</div>
+
+<form class="filtri" method="get">
+  {% if args.get('tutti_i_mesi') != '1' %}
+  <div class="mese">
+    <a class="btn piccolo" href="{{ url_for('main.scadenze', **dict(args, mese=prec.strftime('%Y-%m'))) }}" aria-label="Mese precedente">◀</a>
+    <strong>{{ nome_mese }}</strong>
+    <a class="btn piccolo" href="{{ url_for('main.scadenze', **dict(args, mese=succ.strftime('%Y-%m'))) }}" aria-label="Mese successivo">▶</a>
+    <input type="hidden" name="mese" value="{{ primo.strftime('%Y-%m') }}">
+  </div>
+  {% endif %}
+  <label>Cliente
+    <select name="cliente"><option value="">Tutti</option>
+      {% for c in clienti %}<option value="{{ c.id }}" {{ 'selected' if args.get('cliente') == c.id|string }}>{{ c.ragione_sociale }}</option>{% endfor %}
+    </select></label>
+  <label>Tipo
+    <select name="tipo"><option value="">Tutti</option>
+      {% for t in tipi %}<option value="{{ t.id }}" {{ 'selected' if args.get('tipo') == t.id|string }}>{{ t.nome }}</option>{% endfor %}
+    </select></label>
+  <label>Referente
+    <select name="referente"><option value="">Tutti</option>
+      {% for u in collaboratori %}<option value="{{ u.id }}" {{ 'selected' if args.get('referente') == u.id|string }}>{{ u.nome }}</option>{% endfor %}
+    </select></label>
+  <label>Stato
+    <select name="stato"><option value="">Tutti</option>
+      <option value="da_fare" {{ 'selected' if args.get('stato') == 'da_fare' }}>Da fare</option>
+      <option value="fatto" {{ 'selected' if args.get('stato') == 'fatto' }}>Fatto</option>
+    </select></label>
+  <label class="check"><input type="checkbox" name="tutti_i_mesi" value="1" {{ 'checked' if args.get('tutti_i_mesi') == '1' }}> Tutti i mesi</label>
+  <button class="btn">Filtra</button>
+  <a class="link" href="{{ url_for('main.scadenze') }}">Azzera</a>
+  <a class="link" href="{{ url_for('main.esporta_csv', **args) }}">Esporta Excel (CSV)</a>
+</form>
+
+{% if righe %}
+<form id="multipla" method="post" action="{{ url_for('main.azione_multipla') }}" class="barra-multipla">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="torna" value="{{ torna }}">
+  <span>Selezionate:</span>
+  <button class="btn piccolo" name="azione" value="fatto">Segna fatte</button>
+  <button class="btn piccolo pericolo" name="azione" value="elimina" data-conferma="Eliminare le scadenze selezionate?">Elimina</button>
+</form>
+<table class="tabella">
+  <thead><tr><th><input type="checkbox" data-seleziona-tutto aria-label="Seleziona tutte"></th><th>Data</th><th>Cliente</th><th>Tipo</th><th>Referente</th><th class="num">Importo</th><th>Stato</th><th>Ricevuta</th><th></th></tr></thead>
+  <tbody>{% for r in righe %}{% include "_riga_scadenza.html" %}{% endfor %}</tbody>
+</table>
+<p class="muto">{{ righe|length }} scadenze</p>
+{% else %}
+<p class="vuoto">Nessuna scadenza con questi filtri.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Clienti{% endblock %}
+{% block content %}
+<div class="intestazione">
+  <h1>Clienti</h1>
+  <a class="btn primario" href="{{ url_for('main.cliente_form') }}">Nuovo cliente</a>
+</div>
+{% if righe %}
+<table class="tabella">
+  <thead><tr><th>Ragione sociale</th><th>Codice fiscale</th><th>Partita IVA</th><th>Referente</th><th class="num">Scadenze aperte</th><th></th></tr></thead>
+  <tbody>
+  {% for c in righe %}
+  <tr class="{{ 'fatta' if not c.attivo }}">
+    <td>{{ c.ragione_sociale }}{% if not c.attivo %} <span class="muto">(non attivo)</span>{% endif %}</td>
+    <td>{{ c.codice_fiscale or '' }}</td>
+    <td>{{ c.partita_iva or '' }}</td>
+    <td>{{ c.referente_nome or '—' }}</td>
+    <td class="num"><a href="{{ url_for('main.scadenze', cliente=c.id, tutti_i_mesi=1, stato='da_fare') }}">{{ c.aperte }}</a></td>
+    <td class="azioni"><a href="{{ url_for('main.cliente_form', id_=c.id) }}">Modifica</a></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="vuoto">Nessun cliente. <a href="{{ url_for('main.cliente_form') }}">Aggiungi il primo</a>.</p>
+{% endif %}
+{% endblock %}

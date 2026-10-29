@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Cruscotto{% endblock %}
+{% block content %}
+{% set oggi_iso = oggi.isoformat() %}
+{% set torna = request.full_path %}
+<div class="intestazione">
+  <h1>Ciao {{ g.utente.nome.split(' ')[0] }}</h1>
+  <div class="interruttore">
+    <a href="{{ url_for('main.cruscotto') }}" class="{{ 'on' if not mie }}">Tutto lo studio</a>
+    <a href="{{ url_for('main.cruscotto', mie=1) }}" class="{{ 'on' if mie }}">Solo le mie</a>
+  </div>
+</div>
+
+<div class="riquadri">
+  <div class="riquadro {{ 'rosso' if scadute }}"><div class="n">{{ scadute|length }}</div><div>Scadute e non fatte</div></div>
+  <div class="riquadro {{ 'giallo' if prossime }}"><div class="n">{{ prossime|length }}</div><div>Nei prossimi 7 giorni</div></div>
+  <div class="riquadro"><div class="n">{{ fatte_mese }}</div><div>Fatte questo mese</div></div>
+  <div class="riquadro"><div class="n">{{ n_clienti }}</div><div>Clienti attivi</div></div>
+</div>
+
+{% if not n_clienti %}
+<div class="vuoto">
+  <h2>Per iniziare</h2>
+  <ol>
+    <li><a href="{{ url_for('main.cliente_form') }}">Aggiungi i tuoi clienti</a></li>
+    <li><a href="{{ url_for('main.scadenze_in_blocco') }}">Crea le scadenze in blocco</a> (es. F24 del 16 per tutti)</li>
+    <li>Segna "Fatto" man mano: le scadenze mensili si ricreano da sole</li>
+  </ol>
+</div>
+{% endif %}
+
+{% for titolo, elenco, vuoto in [("Scadute", scadute, "Nessuna scadenza arretrata. Ottimo."), ("Prossimi 7 giorni", prossime, "Niente in arrivo questa settimana.")] %}
+<section>
+  <h2>{{ titolo }}</h2>
+  {% if elenco %}
+  <table class="tabella">
+    <thead><tr><th>Data</th><th>Cliente</th><th>Tipo</th><th>Referente</th><th class="num">Importo</th><th>Stato</th><th>Ricevuta</th><th></th></tr></thead>
+    <tbody>{% for r in elenco %}{% include "_riga_scadenza.html" %}{% endfor %}</tbody>
+  </table>
+  {% else %}<p class="muto">{{ vuoto }}</p>{% endif %}
+</section>
+{% endfor %}
+{% endblock %}

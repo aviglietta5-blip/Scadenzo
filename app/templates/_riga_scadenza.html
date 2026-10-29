@@ -1,0 +1,27 @@
+{# Una riga della tabella scadenze. Richiede: r, torna, (opzionale) selezione #}
+<tr class="{{ 'fatta' if r.stato == 'fatto' }} {{ 'scaduta' if r.stato == 'da_fare' and r.data < oggi_iso }}">
+  {% if selezione %}<td><input type="checkbox" name="sel" value="{{ r.id }}" form="multipla" aria-label="Seleziona"></td>{% endif %}
+  <td class="nowrap">{{ r.data|data_it }}</td>
+  <td>{{ r.ragione_sociale }}</td>
+  <td><span class="etichetta" style="--c: {{ r.colore }}">{{ r.tipo_nome }}</span></td>
+  <td>{{ r.referente_nome or '—' }}</td>
+  <td class="num">{{ r.importo|euro }}</td>
+  <td>
+    <form method="post" action="{{ url_for('main.cambia_stato', id_=r.id) }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="torna" value="{{ torna }}">
+      <button class="stato {{ r.stato }}">{{ 'Fatto' if r.stato == 'fatto' else 'Da fare' }}</button>
+    </form>
+  </td>
+  <td>
+    <form method="post" action="{{ url_for('main.cambia_ricevuta', id_=r.id) }}">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="torna" value="{{ torna }}">
+      <button class="ricevuta {{ 'si' if r.ricevuta }}">{{ 'Scaricata' if r.ricevuta else 'Da scaricare' }}</button>
+    </form>
+  </td>
+  <td class="azioni">
+    <a href="{{ url_for('main.modifica_scadenza', id_=r.id) }}">Modifica</a>
+  </td>
+</tr>
+{% if r.note %}<tr class="nota"><td colspan="{{ 9 if selezione else 8 }}">Nota: {{ r.note }}</td></tr>{% endif %}
